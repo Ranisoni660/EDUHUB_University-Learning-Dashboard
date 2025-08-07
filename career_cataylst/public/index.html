@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Catalyst - AI Interview Simulator</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+</head>
+<body>
+    <div class="floating-particles" id="particles-container"></div>
+    
+    <div class="container">
+    <div id="get-started-page" class="step-container">
+        <div class="split-layout">
+            <div class="left-section">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h1 class="welcome-title">Step Into the Interview Chair</h1>
+                    <p class="welcome-subtitle">
+                        Ready to impress? This is your personal mock interview arena – where AI meets real-world interview pressure. Speak, get scored, and level up with instant feedback.
+                    </p>
+                    <div class="pulse-animation"></div>
+                    <!-- Arrow container for scrolling to checklist -->
+                    <div class="arrow-container" onclick="scrollDown()">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                </div>
+            </div>
+                <div class="right-section">
+                    <div class="image-container">
+                        <img src="/career_cataylst/public/i6.png" alt="Career Catalyst" class="hero-image">
+                        <div class="image-glow"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="confirmation-section" id="prechecklist">
+                <div class="checkboxes-container">
+                    <h3>Pre-Interview Checklist</h3>
+                    <div class="checkbox-list">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="voice-check">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">I am aware this is a voice-based interview</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="ai-check">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">I understand AI voice will not be used in my answer</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="fullscreen-check">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">I am using this in full screen and will not exit</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="minimize-check">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">I cannot close or minimize during the process</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="confirmation-box">
+                    <div class="brain-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Are you sure you want to start your interview?</h3>
+                    <div class="start-input-container">
+                        <input type="text" id="start-input" placeholder='Type "start" to continue' class="start-input">
+                        <div class="input-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Interview Type Selection -->
+        <div id="step-interview-type" class="step-container hidden">
+            <div class="step-card-3d">
+                <h2 class="step-title">Select Interview Type</h2>
+                <div class="option-cards-3d">
+                    <div class="option-card-3d" data-value="hr">
+                        <div class="card-inner">
+                            <i class="fas fa-users"></i>
+                            <h3>HR Interview</h3>
+                            <p>Behavioral & General Questions</p>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="technical">
+                        <div class="card-inner">
+                            <i class="fas fa-laptop-code"></i>
+                            <h3>Technical Interview</h3>
+                            <p>Skills & Technical Questions</p>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HR Type Selection -->
+        <div id="step-hr-type" class="step-container hidden">
+            <div class="step-card-3d">
+                <h2 class="step-title">Choose HR Interview Type</h2>
+                <div class="option-cards-3d grid-3">
+                    <div class="option-card-3d" data-value="general">
+                        <div class="card-inner">
+                            <i class="fas fa-handshake"></i>
+                            <h3>General HR</h3>
+                            <p>Standard interview questions</p>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="freshers">
+                        <div class="card-inner">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h3>Freshers HR</h3>
+                            <p>Entry-level focused</p>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="behavioral">
+                        <div class="card-inner">
+                            <i class="fas fa-psychology"></i>
+                            <h3>Behavioral HR</h3>
+                            <p>STAR method questions</p>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Domain Selection -->
+        <div id="step-domain" class="step-container hidden">
+            <div class="step-card-3d">
+                <h2 class="step-title">Choose Your Domain</h2>
+                <div class="option-cards-3d grid-5">
+                    <div class="option-card-3d" data-value="web-development">
+                        <div class="card-inner">
+                            <i class="fas fa-code"></i>
+                            <h3>Web Development</h3>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="data-science">
+                        <div class="card-inner">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Data Science</h3>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="civil-engineering">
+                        <div class="card-inner">
+                            <i class="fas fa-building"></i>
+                            <h3>Civil Engineering</h3>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="marketing">
+                        <div class="card-inner">
+                            <i class="fas fa-bullhorn"></i>
+                            <h3>Marketing</h3>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                    <div class="option-card-3d" data-value="mechanical">
+                        <div class="card-inner">
+                            <i class="fas fa-cogs"></i>
+                            <h3>Mechanical</h3>
+                        </div>
+                        <div class="card-glow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Duration Selection -->
+        <div id="step-duration" class="step-container hidden">
+            <div class="step-card-3d">
+                <h2 class="step-title">Set Interview Duration</h2>
+                <div class="duration-input-3d">
+                    <label for="duration">Duration (1-15 minutes)</label>
+                    <input type="number" id="duration" min="1" max="15" value="10" class="input-3d">
+                    <button id="start-interview" class="btn-3d btn-primary-3d">
+                        <i class="fas fa-play"></i> 
+                        <span>Continue</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interview Phase -->
+        <div id="interview-phase" class="step-container hidden">
+            <div class="interview-header-3d">
+                <div class="ai-avatar-3d">
+                    <i class="fas fa-user-tie"></i>
+                    <div class="avatar-pulse"></div>
+                </div>
+                <div class="ai-info">
+                    <h3>AI Interviewer</h3>
+                    <p>Question <span id="question-number">1</span> of 2</p>
+                </div>
+            </div>
+
+            <div class="question-card-3d">
+                <div class="question-content">
+                    <h3>Question:</h3>
+                    <p id="current-question">Tell me about yourself and your background.</p>
+                    <div class="question-subtitle">
+                        <i class="fas fa-clock"></i> Expected Answer Time: 2 minutes
+                    </div>
+                </div>
+
+                <div class="question-controls">
+                    <button id="replay-question" class="btn-3d btn-secondary-3d">
+                        <i class="fas fa-volume-up"></i> 
+                        <span>Replay Question</span>
+                        <span id="replay-count">(2 left)</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="recording-card-3d">
+                <div class="recording-controls">
+                    <button id="record-answer" class="btn-3d btn-record-3d">
+                        <i class="fas fa-microphone"></i> 
+                        <span>Record Answer</span>
+                        <span id="record-count">(2 attempts left)</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                    <button id="stop-recording" class="btn-3d btn-stop-3d hidden">
+                        <i class="fas fa-stop"></i> 
+                        <span>Stop Recording</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                    <button id="upload-answer" class="btn-3d btn-upload-3d">
+    <i class="fas fa-upload"></i> 
+    <span>Upload Answer</span>
+    <input type="file" id="audio-upload" accept="audio/mp3,audio/wav" style="display: none;">
+    <div class="btn-glow"></div>
+</button>
+                    <button id="submit-answer" class="btn-3d btn-submit-3d hidden">
+                        <i class="fas fa-check"></i> 
+                        <span>Submit Answer</span>
+                        <div class="btn-glow"></div>
+                    </button>
+
+                </div>
+
+                <div id="recording-indicator" class="recording-indicator-3d hidden">
+                    <div class="soundwave-3d">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <div class="recording-timer">
+                        Recording: <span id="timer-display">00:00</span>
+                    </div>
+                </div>
+
+                <div class="speaking-tracker-3d">
+                    <button id="speaking-time" class="btn-3d btn-outline-3d">
+                        <i class="fas fa-clock"></i> 
+                        <span>You've spoken for <span id="spoken-time">0:00</span></span>
+                        <div class="btn-glow"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thank You Phase -->
+        <div id="thank-you-phase" class="step-container hidden">
+            <div class="step-card-3d">
+                <div class="thank-you-content">
+                    <div class="success-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2>You've completed your AI Interview!</h2>
+                    <p>Thank you for participating in the Career Catalyst AI Interview Simulator.</p>
+                    <button id="get-feedback" class="btn-3d btn-primary-3d">
+                        <i class="fas fa-chart-bar"></i> 
+                        <span>View My Feedback</span>
+
+                        <div class="btn-glow"></div>
+                    </button>
+                    <div id="feedback-container" class="feedback-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-messages" class="status-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function scrollDown() {
+            const checklistSection = document.getElementById('prechecklist');
+            const arrowContainer = document.querySelector('.arrow-container');
+            checklistSection.scrollIntoView({ behavior: 'smooth' });
+            arrowContainer.style.display = 'none'; // Hide the arrow container after scrolling
+        }
+    </script>
+</body>
+</html>

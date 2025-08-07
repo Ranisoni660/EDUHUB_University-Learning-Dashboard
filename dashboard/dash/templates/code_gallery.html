@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Code Gallery - EduHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="bg-gradient-info text-white rounded-3 p-4 mb-5 text-center">
+            <h1 class="display-5 mb-3">
+                <i class="fas fa-code-branch me-3"></i>
+                Community Code Gallery
+            </h1>
+            <p class="lead mb-0">Discover, learn, and get help from your peers' code solutions</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-share-alt fa-2x text-primary mb-2"></i>
+                <h5 class="text-primary">{{ code_shares|length }}</h5>
+                <p class="mb-0 text-muted">Code Solutions Shared</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-hands-helping fa-2x text-success mb-2"></i>
+                <h5 class="text-success">{{ code_shares|selectattr("help_needed", "equalto", true)|list|length }}</h5>
+                <p class="mb-0 text-muted">Need Help</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter/Search -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Search code by title, language, or description...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="filterByHelp()">
+                        <i class="fas fa-question-circle me-1"></i>Need Help Only
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="showAll()">
+                        <i class="fas fa-list me-1"></i>Show All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Code Shares -->
+<div class="row g-4" id="codeGallery">
+    {% for share in code_shares %}
+    <div class="col-lg-6 code-item" data-title="{{ share.title|lower }}" 
+         data-description="{{ share.description|lower }}" data-help="{{ share.help_needed|lower }}">
+        <div class="card border-0 shadow-lg h-100 {% if share.help_needed %}border-danger{% endif %}">
+            <div class="card-header bg-white border-0">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1 text-primary">{{ share.title }}</h5>
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="fas fa-user me-2"></i>
+                            <span>{{ share.student_name }}</span>
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock me-1"></i>
+                            <span>{{ share.created_at[:16] }}</span>
+                        </div>
+                    </div>
+                    {% if share.help_needed %}
+                    <span class="badge bg-danger">
+                        <i class="fas fa-help me-1"></i>Help Needed
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if share.description %}
+                <p class="text-muted mb-3">{{ share.description }}</p>
+                {% endif %}
+                
+                <div class="bg-dark rounded-3 p-3 mb-3">
+                    <pre class="text-light mb-0" style="font-size: 12px; max-height: 200px; overflow-y: auto;"><code>{{ share.code }}</code></pre>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="copyCode({{ loop.index0 }})">
+                        <i class="fas fa-copy me-1"></i>Copy
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="viewFullCode({{ share.id }})">
+                        <i class="fas fa-expand me-1"></i>View Full
+                    </button>
+                    {% if share.help_needed %}
+                    <button class="btn btn-sm btn-outline-success" onclick="offerHelp({{ share.id }}, '{{ share.student_name }}')">
+                        <i class="fas fa-hands-helping me-1"></i>Offer Help
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not code_shares %}
+<div class="text-center py-5">
+    <i class="fas fa-code fa-4x text-muted mb-4"></i>
+    <h4 class="text-muted mb-3">No Code Shared Yet</h4>
+    <p class="text-muted mb-4">Be the first to share your code with the community!</p>
+    <a href="{{ url_for('collaboration') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-2"></i>Share Your Code
+    </a>
+</div>
+{% endif %}
+
+<!-- Full Code Modal -->
+<div class="modal fade" id="fullCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-code me-2"></i>
+                    <span id="modalTitle"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Description:</strong>
+                    <p class="text-muted" id="modalDescription"></p>
+                </div>
+                <div class="mb-3">
+                    <strong>Code:</strong>
+                    <div class="bg-dark rounded p-3">
+                        <pre class="text-light mb-0" id="modalCode"></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="copyModalCode()">
+                    <i class="fas fa-copy me-2"></i>Copy Code
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const items = document.querySelectorAll('.code-item');
+    
+    items.forEach(item => {
+        const title = item.getAttribute('data-title');
+        const description = item.getAttribute('data-description');
+        
+        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Filter by help needed
+function filterByHelp() {
+    const items = document.querySelectorAll('.code-item');
+    items.forEach(item => {
+        const needsHelp = item.getAttribute('data-help') === 'true';
+        item.style.display = needsHelp ? 'block' : 'none';
+    });
+}
+
+// Show all items
+function showAll() {
+    const items = document.querySelectorAll('.code-item');
+    items.forEach(item => {
+        item.style.display = 'block';
+    });
+    document.getElementById('searchInput').value = '';
+}
+
+// Copy code to clipboard
+function copyCode(index) {
+    const codeElement = document.querySelectorAll('pre code')[index];
+    const code = codeElement.textContent;
+    
+    navigator.clipboard.writeText(code).then(() => {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        button.classList.replace('btn-outline-primary', 'btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.replace('btn-success', 'btn-outline-primary');
+        }, 2000);
+    });
+}
+
+// View full code in modal
+function viewFullCode(shareId) {
+    // In a real implementation, this would fetch the full details from the server
+    // For now, we'll use the data already available
+    const shareData = {
+        {% for share in code_shares %}
+        {{ share.id }}: {
+            title: "{{ share.title }}",
+            description: "{{ share.description }}",
+            code: `{{ share.code }}`
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    
+    const share = shareData[shareId];
+    if (share) {
+        document.getElementById('modalTitle').textContent = share.title;
+        document.getElementById('modalDescription').textContent = share.description || 'No description provided.';
+        document.getElementById('modalCode').textContent = share.code;
+        
+        new bootstrap.Modal(document.getElementById('fullCodeModal')).show();
+    }
+}
+
+// Copy code from modal
+function copyModalCode() {
+    const code = document.getElementById('modalCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        alert('Code copied to clipboard!');
+    });
+}
+
+// Offer help
+function offerHelp(shareId, studentName) {
+    alert(`You're offering to help ${studentName}! In a full implementation, this would start a conversation or pair programming session.`);
+}
+</script>
+{% endblock %}

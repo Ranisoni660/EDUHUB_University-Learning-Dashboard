@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.name }} - Collaboration Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Student Profile -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-body text-center p-4">
+                <div class="bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3 pulse" 
+                     style="width: 80px; height: 80px;">
+                    <i class="fas fa-user fa-2x text-white fa-spin-slow"></i>
+                </div>
+                <h4 class="mb-1">{{ student.name }}</h4>
+                <p class="text-muted mb-3">{{ student.email }}</p>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h5 class="mb-0 text-primary">{{ study_groups|length }}</h5>
+                        <small class="text-muted">Groups</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="mb-0 text-success">{{ code_shares|length }}</h5>
+                        <small class="text-muted">Shared</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="mb-0 text-info">{{ active_sessions|length }}</h5>
+                        <small class="text-muted">Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0 text-primary fw-bold">
+                    <i class="fas fa-rocket me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#pairProgrammingModal">
+                        <i class="fas fa-code text-primary me-3"></i>Start Pair Programming
+                    </button>
+                    <button class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                        <i class="fas fa-users text-success me-3"></i>Create Study Group
+                    </button>
+                    <button class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#shareCodeModal">
+                        <i class="fas fa-share-alt text-info me-3"></i>Share Code
+                    </button>
+                    <a href="{{ url_for('code_gallery') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-eye text-warning me-3"></i>Browse Code Gallery
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- My Study Groups -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0 text-primary fw-bold">
+                    <i class="fas fa-users me-2"></i>My Study Groups
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if study_groups %}
+                    <div class="row g-3">
+                        {% for group in study_groups %}
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success">{{ group.name }}</h6>
+                                    <p class="card-text small text-muted">{{ group.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-success">{{ group.members|length }} members</span>
+                                        <small class="text-muted">{{ group.created_at[:10] }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No study groups yet</h6>
+                        <p class="text-muted small">Join existing groups or create your own</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#joinGroupModal">
+                            <i class="fas fa-plus me-2"></i>Join a Group
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Available Groups to Join -->
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0 text-info fw-bold">
+                    <i class="fas fa-plus-circle me-2"></i>Available Groups
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for group in all_groups %}
+                        {% if student.id not in group.members %}
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">{{ group.name }}</h6>
+                                    <p class="card-text small text-muted">{{ group.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-info">{{ group.members|length }} members</span>
+                                        <form method="POST" action="{{ url_for('join_study_group') }}" class="d-inline">
+                                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-user-plus me-1"></i>Join
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Code Shares -->
+        {% if code_shares %}
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0 text-warning fw-bold">
+                    <i class="fas fa-code-branch me-2"></i>My Recent Code Shares
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for share in code_shares %}
+                <div class="card border-warning mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="card-title">{{ share.title }}</h6>
+                                <p class="card-text small text-muted">{{ share.description }}</p>
+                                <small class="text-muted">{{ share.created_at }}</small>
+                            </div>
+                            {% if share.help_needed %}
+                                <span class="badge bg-danger">Help Needed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Create Study Group Modal -->
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-users me-2"></i>Create Study Group
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('create_study_group') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="group_name" class="form-label fw-bold">Group Name</label>
+                        <input type="text" class="form-control" id="group_name" name="group_name" required
+                               placeholder="e.g., Python Study Circle">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-bold">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required
+                                  placeholder="What will your group focus on?"></textarea>
+                    </div>
+                    <input type="hidden" name="creator_id" value="{{ student.id }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Create Group
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Share Code Modal -->
+<div class="modal fade" id="shareCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-share-alt me-2"></i>Share Code
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('share_code') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="share_title" class="form-label fw-bold">Title</label>
+                        <input type="text" class="form-control" id="share_title" name="title" required
+                               placeholder="e.g., Binary Search Implementation">
+                    </div>
+                    <div class="mb-3">
+                        <label for="share_code" class="form-label fw-bold">Code</label>
+                        <textarea class="form-control" id="share_code" name="code" rows="8" required
+                                  placeholder="Paste your code here..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="share_description" class="form-label fw-bold">Description (Optional)</label>
+                        <textarea class="form-control" id="share_description" name="description" rows="2"
+                                  placeholder="Explain your approach or ask specific questions..."></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="help_needed" name="help_needed">
+                        <label class="form-check-label" for="help_needed">
+                            <i class="fas fa-help-circle me-1"></i>I need help with this code
+                        </label>
+                    </div>
+                    <input type="hidden" name="student_id" value="{{ student.id }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-share me-2"></i>Share Code
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Start Pair Programming Modal -->
+<div class="modal fade" id="pairProgrammingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-code me-2"></i>Start Pair Programming
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('pair_programming') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="partner_select" class="form-label fw-bold">Choose Partner</label>
+                        <select class="form-select" id="partner_select" name="student2_id" required>
+                            <option value="">Select a partner...</option>
+                            {% for other_student in students %}
+                                {% if other_student.id != student.id %}
+                                <option value="{{ other_student.id }}">{{ other_student.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="problem_title" class="form-label fw-bold">Problem/Topic</label>
+                        <input type="text" class="form-control" id="problem_title" name="problem_title" required
+                               placeholder="e.g., Two Sum Problem, Merge Sort">
+                    </div>
+                    <input type="hidden" name="student1_id" value="{{ student.id }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Start Session
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Catalyst - Outfit Checker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@700&display=swap');
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #4682B4, #1E90FF);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite;
+            top: -40px;
+            left: -40px;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite 1.5s;
+            bottom: -40px;
+            right: -40px;
+        }
+        @keyframes drip {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            width: 80%;
+            max-width: 900px;
+            position: relative;
+        }
+        .left-panel {
+            flex: 1;
+            padding: 30px;
+            text-align: center;
+            background: #edf0f3;
+            border-radius: 15px;
+            margin-right: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .image-feedback-section {
+            flex: 1;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB, #4682B4, #1E90FF);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            height: 400px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            position: relative;
+            overflow: visible;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .image-feedback-section::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite;
+            top: -40px;
+            left: -40px;
+        }
+        .image-feedback-section::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite 1.5s;
+            bottom: -40px;
+            right: -40px;
+        }
+        .image-section {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 10px;
+            margin-right: 20px;
+            height: 89%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .feedback-section {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            width: 150px;
+            height: 89%;
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-family: 'Lora', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.2);
+        }
+        p {
+            color: #1e3a8a;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .upload-box {
+            background: linear-gradient(135deg, #87CEEB, #4682B4, #1E90FF);
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+            width: 200px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .upload-box::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite;
+            top: -40px;
+            left: -40px;
+        }
+        .upload-box::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: drip 3s infinite 1.5s;
+            bottom: -40px;
+            right: -40px;
+        }
+        .upload-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+        .upload-icon {
+            width: 42px;
+            height: 42px;
+            margin-left: 7px;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: transform 0.2s ease-in-out;
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
+        }
+        .upload-icon:hover {
+            transform: scale(1.1);
+        }
+        .upload-text {
+            font-size: 1.1em;
+            color: #ffffff;
+            margin-top: 10px;
+            display: block;
+        }
+        .camera-option {
+            font-size: 0.9em;
+            color: #000000;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .camera-option span {
+            color: #4682B4;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .camera-option span:hover {
+            color: #1E90FF;
+        }
+        .analyze-btn {
+            background: linear-gradient(90deg, #30377a, #36758a, #151c6d);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+            width: 250px;
+            margin: 20px auto 0;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 10px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .analyze-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .analyze-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.4);
+            background: linear-gradient(90deg, #2a5298, #1e3a8a);
+        }
+        .image-placeholder, #preview, #video, #canvas {
+            width: 150px;
+            height: 330px;
+            background-color: #edf2f7;
+            margin: 20px auto;
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        #preview, #video, #canvas {
+            display: none;
+        }
+        .uploaded-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .feedback-item {
+            margin: 15px 0;
+            font-size: 1em;
+            color: #1e3a8a;
+        }
+        .tip-section {
+            padding: 20px;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            font-style: italic;
+            color: #374151;
+            font-size: 0.9em;
+            width: 410px;
+        }
+        .file-input {
+            display: none;
+        }
+        .upload-btn-label {
+            display: block;
+            cursor: pointer;
+        }
+        .analysis-header {
+            background: rgba(255, 255, 255, 0);
+            border: 2px solid #4682B4;
+            border-radius: 10px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+            width: 100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .analysis-header span {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #1e3a8a;
+        }
+        .score-item {
+            font-size: 1em;
+            color: #1e3a8a;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .score-item .score {
+            display: block;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .score-item span {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2a5298;
+            margin-left: 0;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+                padding: 15px;
+            }
+            .left-panel, .right-panel {
+                margin: 10px 0;
+                width: 100%;
+            }
+            .image-feedback-section {
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
+            }
+            .image-section, .feedback-section {
+                width: 100%;
+                margin: 10px 0;
+                height: auto;
+            }
+            .upload-box, .analyze-btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            .tip-section {
+                width: 100%;
+                margin-top: 15px;
+            }
+            .image-placeholder, #preview, #video, #canvas {
+                width: 100%;
+                max-width: 150px;
+                height: auto;
+                aspect-ratio: 3 / 5;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+            p {
+                font-size: 1em;
+            }
+            .upload-box, .analyze-btn {
+                max-width: 200px;
+            }
+            .image-feedback-section {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Outfit Checker</h1>
+            <p>Upload your interview outfit and get instant feedback on formality, color coordination, and suitability for the job role.</p>
+            <input type="file" id="file-input" class="file-input" accept="image/*">
+            <label for="file-input" class="upload-btn-label">
+                <div class="upload-box">
+                    <span class="upload-text">Upload Photo</span>
+                </div>
+            </label>
+            <div class="camera-option" id="cameraBtn" onclick="startCamera()">Wanna click instead? <span>Open camera</span></div>
+            <button class="analyze-btn" id="analyzeBtn" onclick="this.innerText === 'Try Again' ? resetForm() : predictImage({target: {files: document.getElementById('file-input').files}})" disabled>Analyze</button>
+            <div id="file-name" style="color: #1e3a8a; margin-top: 10px;"></div>
+        </div>
+        <div class="right-panel">
+            <div class="image-feedback-section">
+                <div class="image-section">
+                    <div id="image-placeholder" class="image-placeholder"></div>
+                    <video id="video" autoplay style="display: none;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <img id="preview" src="" alt="Outfit Preview" class="uploaded-image" style="display: none;" />
+                </div>
+                <div class="feedback-section">
+                    <div class="analysis-header"><span>ANALYSIS</span></div>
+                    <div class="score-item">Overall Score:<br><span class="score" id="overall">N/A</span></div>
+                    <div class="score-item">Formality:<br><span class="score" id="formality">N/A</span></div>
+                    <div class="score-item">Color Coordination:<br><span class="score" id="color">N/A</span></div>
+                    <div class="score-item">Suitability:<br><span class="score" id="suitability">N/A</span></div>
+                </div>
+            </div>
+            <div class="tip-section"><strong>Tip:</strong> <span id="tip">Upload an image to get started!</span></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="/assets/script.js"></script>
+    <script>
+        let stream = null;
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const placeholder = document.getElementById('image-placeholder');
+                        const preview = document.getElementById('preview');
+                        const video = document.getElementById('video');
+                        const analyzeBtn = document.getElementById('analyzeBtn');
+                        placeholder.style.display = 'none';
+                        video.style.display = 'none';
+                        preview.src = event.target.result;
+                        preview.style.display = 'block';
+                        analyzeBtn.disabled = false;
+                        analyzeBtn.innerText = 'Analyze'; // Reset to Analyze
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                            stream = null;
+                        }
+                    };
+                    img.src = event.target.result;
+                    img.className = 'uploaded-image';
+                };
+                reader.readAsDataURL(file);
+                document.getElementById('file-name').textContent = `Uploaded: ${file.name}`;
+            }
+        });
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('image-placeholder').style.display = 'none';
+                document.getElementById('preview').style.display = 'none';
+                document.getElementById('cameraBtn').innerHTML = 'Capture Photo';
+                document.getElementById('cameraBtn').onclick = capturePhoto;
+                document.getElementById('analyzeBtn').disabled = false;
+                document.getElementById('analyzeBtn').innerText = 'Analyze'; // Reset to Analyze
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                document.getElementById('tip').innerText = 'Camera access failed. Use file upload instead.';
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const img = document.getElementById('preview');
+            img.src = canvas.toDataURL('image/jpeg');
+            img.style.display = 'block';
+            video.style.display = 'none';
+            document.getElementById('image-placeholder').style.display = 'none';
+            document.getElementById('cameraBtn').innerHTML = 'Wanna click instead? <span>Open camera</span>';
+            document.getElementById('cameraBtn').onclick = startCamera;
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('analyzeBtn').innerText = 'Analyze'; // Reset to Analyze
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        // Helper function to convert data URL to File
+        function dataURLtoFile(dataurl, filename) {
+            let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while(n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new File([u8arr], filename, { type: mime });
+        }
+
+        // Load model after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            loadModel();
+        });
+    </script>
+</body>
+</html>

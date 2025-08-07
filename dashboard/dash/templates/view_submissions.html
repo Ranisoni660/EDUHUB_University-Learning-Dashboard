@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Submissions for "{{ question.title }}" - University Learning Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Question Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h4 class="mb-2">
+                            {% if question.type == 'coding' %}
+                                <i class="fas fa-code text-primary me-2"></i>
+                            {% else %}
+                                <i class="fas fa-comments text-warning me-2"></i>
+                            {% endif %}
+                            {{ question.title }}
+                        </h4>
+                        <div class="mb-2">
+                            <span class="badge bg-{{ 'success' if question.difficulty == 'Easy' else 'warning' if question.difficulty == 'Medium' else 'danger' }}">
+                                {{ question.difficulty }}
+                            </span>
+                            <span class="badge bg-info">{{ question.type.title() }}</span>
+                            <span class="badge bg-secondary">{{ submissions|length }} Submissions</span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('professor_dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ question.description }}</p>
+                <small class="text-muted">Created: {{ question.created_at }}</small>
+            </div>
+        </div>
+
+        <!-- Submissions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Student Submissions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if submissions %}
+                    {% for submission in submissions %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-user me-2"></i>
+                                        {{ submission.student_name }}
+                                    </h6>
+                                    <small class="text-muted">Submitted: {{ submission.submitted_at }}</small>
+                                </div>
+                                <div>
+                                    {% if submission.feedback %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            Reviewed ({{ submission.feedback.score }}/100)
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Pending Review
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Student Answer -->
+                            <div class="mb-4">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-file-code me-2"></i>
+                                    Student Answer:
+                                </h6>
+                                <div class="bg-light p-3 rounded border">
+                                    <pre class="mb-0" style="white-space: pre-wrap;">{{ submission.answer }}</pre>
+                                </div>
+                            </div>
+
+                            <!-- Existing Feedback -->
+                            {% if submission.feedback %}
+                            <div class="mb-4">
+                                <h6 class="text-success mb-2">
+                                    <i class="fas fa-star me-2"></i>
+                                    Your Feedback (Score: {{ submission.feedback.score }}/100):
+                                </h6>
+                                <div class="bg-success bg-opacity-10 border border-success p-3 rounded">
+                                    <p class="mb-1">{{ submission.feedback.feedback }}</p>
+                                    <small class="text-muted">Provided: {{ submission.feedback.created_at }}</small>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Feedback Form -->
+                            <div class="border-top pt-3">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-comment-alt me-2"></i>
+                                    {% if submission.feedback %}Update Feedback:{% else %}Provide Feedback:{% endif %}
+                                </h6>
+                                <form method="POST" action="{{ url_for('provide_feedback') }}">
+                                    <input type="hidden" name="submission_id" value="{{ submission.id }}">
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-8">
+                                            <label for="feedback_{{ submission.id }}" class="form-label">Feedback</label>
+                                            <textarea class="form-control" id="feedback_{{ submission.id }}" 
+                                                    name="feedback" rows="4" required
+                                                    placeholder="Provide detailed feedback on the solution...">{% if submission.feedback %}{{ submission.feedback.feedback }}{% endif %}</textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="score_{{ submission.id }}" class="form-label">Score (0-100)</label>
+                                            <input type="number" class="form-control" id="score_{{ submission.id }}" 
+                                                   name="score" min="0" max="100" required
+                                                   value="{% if submission.feedback %}{{ submission.feedback.score }}{% endif %}"
+                                                   placeholder="85">
+                                            <div class="form-text">Rate the solution out of 100 points</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            {% if submission.feedback %}Update Feedback{% else %}Provide Feedback{% endif %}
+                                        </button>
+                                        {% if not submission.feedback %}
+                                        <button type="button" class="btn btn-secondary" 
+                                                onclick="generateAIFeedback({{ submission.id }})">
+                                            <i class="fas fa-robot me-2"></i>
+                                            Generate AI Feedback
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No submissions yet</h5>
+                        <p class="text-muted">Students haven't submitted answers for this question yet.</p>
+                        <a href="{{ url_for('professor_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateAIFeedback(submissionId) {
+    // Simulate AI feedback generation
+    const feedbackTexts = [
+        "Good solution! The logic is correct and the code is well-structured. Consider adding more comments for better readability. The time complexity could be optimized further.",
+        "Excellent approach! The solution demonstrates a clear understanding of the problem. The code is clean and efficient. Minor suggestion: handle edge cases more explicitly.",
+        "Solid implementation with correct output. The algorithm choice is appropriate for this problem size. Consider using more descriptive variable names for better maintainability.",
+        "Creative solution! The approach shows good problem-solving skills. The code works correctly but could benefit from better error handling and input validation.",
+        "Well-written solution with good use of data structures. The implementation is efficient and handles most cases correctly. Consider adding more test cases for edge scenarios."
+    ];
+    
+    const scores = [75, 80, 85, 90, 95];
+    
+    const randomFeedback = feedbackTexts[Math.floor(Math.random() * feedbackTexts.length)];
+    const randomScore = scores[Math.floor(Math.random() * scores.length)];
+    
+    // Fill the form with generated feedback
+    document.getElementById(`feedback_${submissionId}`).value = randomFeedback;
+    document.getElementById(`score_${submissionId}`).value = randomScore;
+    
+    // Show success message
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-info alert-dismissible fade show mt-2';
+    alert.innerHTML = `
+        <i class="fas fa-robot me-2"></i>
+        AI feedback generated! Review and modify as needed before submitting.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector(`#feedback_${submissionId}`).parentNode.insertBefore(alert, document.querySelector(`#feedback_${submissionId}`).nextSibling);
+}
+</script>
+{% endblock %}

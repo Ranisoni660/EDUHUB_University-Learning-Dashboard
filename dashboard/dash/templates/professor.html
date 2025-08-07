@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Professor Portal - University Learning Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3">
+        <!-- Professor Navigation -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                    Professor Menu
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('professor_dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('assign_question') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle me-2"></i>Assign Question
+                    </a>
+                    <a href="{{ url_for('view_questions') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list me-2"></i>View All Questions
+                    </a>
+                    <a href="{{ url_for('professor') }}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        {% if show_assign_form %}
+        <!-- Assign Question Form -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Assign New Question
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('assign_question') }}">
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Question Type</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Select question type</option>
+                            <option value="coding">Coding Problem</option>
+                            <option value="interview">Interview Question</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required 
+                               placeholder="Enter question title">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="6" required
+                                  placeholder="Enter detailed question description, requirements, examples, etc."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="difficulty" class="form-label">Difficulty Level</label>
+                        <select class="form-select" id="difficulty" name="difficulty" required>
+                            <option value="">Select difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Assign Question
+                        </button>
+                        <a href="{{ url_for('professor') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% elif show_questions %}
+        <!-- View All Questions -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    All Assigned Questions
+                </h4>
+                <span class="badge bg-secondary">{{ questions|length }} Questions</span>
+            </div>
+            <div class="card-body">
+                {% if questions %}
+                    {% for question in questions %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">
+                                        {% if question.type == 'coding' %}
+                                            <i class="fas fa-code text-primary me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-comments text-warning me-2"></i>
+                                        {% endif %}
+                                        {{ question.title }}
+                                    </h5>
+                                    <div class="mb-2">
+                                        <span class="badge bg-{{ 'success' if question.difficulty == 'Easy' else 'warning' if question.difficulty == 'Medium' else 'danger' }}">
+                                            {{ question.difficulty }}
+                                        </span>
+                                        <span class="badge bg-info">{{ question.type.title() }}</span>
+                                    </div>
+                                    <p class="card-text">{{ question.description[:200] }}{% if question.description|length > 200 %}...{% endif %}</p>
+                                    <small class="text-muted">Created: {{ question.created_at }}</small>
+                                </div>
+                                <div class="ms-3">
+                                    <a href="{{ url_for('view_submissions', question_id=question.id) }}" 
+                                       class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye me-1"></i>View Submissions
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No questions assigned yet</h5>
+                        <p class="text-muted">Start by assigning your first question to students.</p>
+                        <a href="{{ url_for('assign_question') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>Assign First Question
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Default Professor Welcome -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-chalkboard-teacher fa-4x text-primary"></i>
+                </div>
+                <h2 class="mb-3">Welcome to Professor Portal</h2>
+                <p class="lead text-muted mb-4">
+                    Manage your students' learning journey with comprehensive tools for assignment and assessment.
+                </p>
+                
+                <div class="row g-3 justify-content-center">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('professor_dashboard') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            View Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('assign_question') }}" class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Assign Question
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

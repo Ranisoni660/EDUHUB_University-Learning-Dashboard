@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Peer Collaboration Hub - EduHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-5">
+        <div class="bg-gradient-primary text-white rounded-3 p-5 mb-4 pulse">
+            <h1 class="display-4 mb-3 gradient-text">
+                <i class="fas fa-users fa-2x me-3 fa-spin"></i>
+
+                Peer Collaboration Hub
+            </h1>
+            <p class="lead mb-0">Connect, Learn, and Code Together with Fellow Indians 🇮🇳</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                     style="width: 80px; height: 80px;">
+                    <i class="fas fa-code fa-2x text-white"></i>
+                </div>
+                <h4 class="text-primary fw-bold mb-3">Live Pair Programming</h4>
+                <p class="text-muted mb-4">Code together in real-time with your classmates. Share screens, solve problems collaboratively, and learn from each other.</p>
+                <a href="{{ url_for('pair_programming') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-laptop-code me-2"></i>Start Session
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-gradient-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                     style="width: 80px; height: 80px;">
+                    <i class="fas fa-users fa-2x text-white"></i>
+                </div>
+                <h4 class="text-success fw-bold mb-3">Study Groups</h4>
+                <p class="text-muted mb-4">Join or create study groups to practice interviews with classmates and discuss challenging concepts.</p>
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#studyGroupModal">
+                    <i class="fas fa-user-plus me-2"></i>Join Groups
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card border-0 shadow-lg h-100">
+            <div class="card-body text-center p-4">
+                <div class="bg-gradient-info rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                     style="width: 80px; height: 80px;">
+                    <i class="fas fa-share-alt fa-2x text-white"></i>
+                </div>
+                <h4 class="text-info fw-bold mb-3">Code Sharing</h4>
+                <p class="text-muted mb-4">Share your code solutions, get help from peers on difficult problems, and contribute to the learning community.</p>
+                <a href="{{ url_for('code_gallery') }}" class="btn btn-info btn-lg">
+                    <i class="fas fa-eye me-2"></i>View Gallery
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Study Groups -->
+<div class="card border-0 shadow-lg mb-5">
+    <div class="card-header bg-white border-0 py-4">
+        <h3 class="mb-0 text-primary fw-bold">
+            <i class="fas fa-fire me-2"></i>Active Study Groups
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            {% for group in study_groups %}
+            <div class="col-md-6">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title text-primary mb-0">{{ group.name }}</h5>
+                            <span class="badge bg-primary">{{ group.members|length }} members</span>
+                        </div>
+                        <p class="card-text text-muted">{{ group.description }}</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Created: {{ group.created_at }}
+                            </small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            {% for member_id in group.members %}
+                                {% set member = students|selectattr("id", "equalto", member_id)|first %}
+                                {% if member %}
+                                <span class="badge bg-light text-dark">{{ member.name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-outline-primary pulse" onclick="joinGroupFromHub({{ group.id }}, '{{ group.name }}')">
+                            <i class="fas fa-user-plus me-2"></i>Join Group
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Student Selection Modal -->
+<div class="modal fade" id="studyGroupModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-users me-2"></i>Select Your Identity
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4">Select your identity to access collaboration features:</p>
+                <div class="row g-3">
+                    {% for student in students %}
+                    <div class="col-md-6">
+                        <div class="card border-primary h-100" style="cursor: pointer;" onclick="selectStudentForCollab({{ student.id }})">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-user-circle fa-3x text-primary mb-2"></i>
+                                <h6 class="mb-1">{{ student.name }}</h6>
+                                <small class="text-muted">{{ student.email }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectStudentForCollab(studentId) {
+    window.location.href = `/collaboration/${studentId}`;
+}
+
+function joinGroupFromHub(groupId, groupName) {
+    // First select student identity
+    $('#studyGroupModal').modal('show');
+    
+    // Store group info for after student selection
+    sessionStorage.setItem('pendingGroupId', groupId);
+    sessionStorage.setItem('pendingGroupName', groupName);
+}
+
+// Update selectStudentForCollab to handle pending group join
+function selectStudentForCollab(studentId) {
+    const pendingGroupId = sessionStorage.getItem('pendingGroupId');
+    if (pendingGroupId) {
+        // Join the group directly
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/collaboration/join_group';
+        
+        const groupInput = document.createElement('input');
+        groupInput.type = 'hidden';
+        groupInput.name = 'group_id';
+        groupInput.value = pendingGroupId;
+        
+        const studentInput = document.createElement('input');
+        studentInput.type = 'hidden';
+        studentInput.name = 'student_id';
+        studentInput.value = studentId;
+        
+        form.appendChild(groupInput);
+        form.appendChild(studentInput);
+        document.body.appendChild(form);
+        form.submit();
+        
+        sessionStorage.removeItem('pendingGroupId');
+        sessionStorage.removeItem('pendingGroupName');
+    } else {
+        window.location.href = `/collaboration/${studentId}`;
+    }
+}
+
+// Add direct join functionality for groups
+function joinGroupDirectly(groupId, studentId) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/collaboration/join_group';
+    
+    const groupInput = document.createElement('input');
+    groupInput.type = 'hidden';
+    groupInput.name = 'group_id';
+    groupInput.value = groupId;
+    
+    const studentInput = document.createElement('input');
+    studentInput.type = 'hidden';
+    studentInput.name = 'student_id';
+    studentInput.value = studentId;
+    
+    form.appendChild(groupInput);
+    form.appendChild(studentInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

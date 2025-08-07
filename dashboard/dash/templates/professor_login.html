@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Professor Login - University Learning Dashboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                    Professor Access
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted text-center mb-4">
+                    Welcome! This is a demonstration system for hackathon purposes. Click below to access the professor portal.
+                </p>
+                
+                <div class="text-center mb-4">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h6 class="text-muted">Secure Access</h6>
+                    <p class="small text-muted">
+                        In a production environment, this would require proper authentication.
+                        For this demo, direct access is provided.
+                    </p>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="{{ url_for('professor_portal') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Access Professor Portal
+                    </a>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <h6 class="text-muted mb-3">Professor Tools:</h6>
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <i class="fas fa-plus-circle fa-2x text-primary mb-2"></i>
+                            <p class="small">Assign Questions</p>
+                        </div>
+                        <div class="col-3">
+                            <i class="fas fa-users fa-2x text-success mb-2"></i>
+                            <p class="small">Track Students</p>
+                        </div>
+                        <div class="col-3">
+                            <i class="fas fa-comment-alt fa-2x text-info mb-2"></i>
+                            <p class="small">Provide Feedback</p>
+                        </div>
+                        <div class="col-3">
+                            <i class="fas fa-chart-bar fa-2x text-warning mb-2"></i>
+                            <p class="small">View Analytics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

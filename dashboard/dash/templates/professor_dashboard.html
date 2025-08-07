@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Professor Dashboard - University Learning Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Overview Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-info mb-3"></i>
+                <h4 class="mb-0">{{ total_students }}</h4>
+                <p class="text-muted mb-0">Total Students</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clipboard-list fa-2x text-primary mb-3"></i>
+                <h4 class="mb-0">{{ total_questions }}</h4>
+                <p class="text-muted mb-0">Questions Assigned</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-paper-plane fa-2x text-success mb-3"></i>
+                <h4 class="mb-0">{{ total_submissions }}</h4>
+                <p class="text-muted mb-0">Total Submissions</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-warning mb-3"></i>
+                <h4 class="mb-0">{{ "%.1f"|format((total_submissions / ((total_students * total_questions) if (total_students * total_questions) > 0 else 1) * 100)) }}%</h4>
+                <p class="text-muted mb-0">Completion Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Student Progress Analytics -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Student Progress Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="progressChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Questions -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-alt me-2"></i>
+                    Recent Questions
+                </h5>
+                <a href="{{ url_for('assign_question') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add New
+                </a>
+            </div>
+            <div class="card-body">
+                {% if questions %}
+                    {% for question in questions[-5:] %}
+                    <div class="d-flex justify-content-between align-items-center py-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                                {% if question.type == 'coding' %}
+                                    <i class="fas fa-code text-primary me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-comments text-warning me-2"></i>
+                                {% endif %}
+                                {{ question.title }}
+                            </h6>
+                            <small class="text-muted">{{ question.created_at }}</small>
+                            <span class="badge bg-{{ 'success' if question.difficulty == 'Easy' else 'warning' if question.difficulty == 'Medium' else 'danger' }} ms-2">
+                                {{ question.difficulty }}
+                            </span>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('view_submissions', question_id=question.id) }}" 
+                               class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if questions|length > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('view_questions') }}" class="btn btn-outline-secondary">
+                            View All {{ questions|length }} Questions
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard-list fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No questions assigned yet.</p>
+                        <a href="{{ url_for('assign_question') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Assign First Question
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Student Progress Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-graduate me-2"></i>
+                    Student Progress
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if student_progress %}
+                    {% for progress in student_progress %}
+                    <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ progress.student.name }}</h6>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" 
+                                     style="width: {{ progress.completion_rate }}%"></div>
+                            </div>
+                            <small class="text-muted">
+                                {{ progress.submissions_count }}/{{ total_questions }} completed
+                                {% if progress.feedback_count > 0 %}
+                                    • {{ progress.feedback_count }} feedback
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="ms-2 text-end">
+                            <small class="text-success fw-bold">{{ "%.0f"|format(progress.completion_rate) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No student activity yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Student Progress Chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    
+    const chartData = {
+        labels: [
+            {% for progress in student_progress %}
+            '{{ progress.student.name }}'{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Completion Rate (%)',
+            data: [
+                {% for progress in student_progress %}
+                {{ "%.1f"|format(progress.completion_rate) }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.2)',
+                'rgba(13, 202, 240, 0.2)',
+                'rgba(255, 193, 7, 0.2)',
+                'rgba(220, 53, 69, 0.2)',
+                'rgba(111, 66, 193, 0.2)'
+            ],
+            borderColor: [
+                'rgba(25, 135, 84, 1)',
+                'rgba(13, 202, 240, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(220, 53, 69, 1)',
+                'rgba(111, 66, 193, 1)'
+            ],
+            borderWidth: 2
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Student Completion Rates'
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

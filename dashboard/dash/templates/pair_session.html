@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Pair Programming Session - EduHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Session Info Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header bg-gradient-primary text-white text-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Active Session
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h6 class="text-primary">{{ session.problem_title }}</h6>
+                        <small class="text-muted">Started: {{ session.started_at }}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-success mb-2">
+                            <i class="fas fa-user me-2"></i>Partner 1
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                 style="width: 30px; height: 30px;">
+                                <i class="fas fa-user text-white small"></i>
+                            </div>
+                            <span>{{ student1.name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-info mb-2">
+                            <i class="fas fa-user me-2"></i>Partner 2
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                 style="width: 30px; height: 30px;">
+                                <i class="fas fa-user text-white small"></i>
+                            </div>
+                            <span>{{ student2.name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="badge bg-success mb-3">
+                            <i class="fas fa-circle me-1"></i>Live Session
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="copySessionLink()">
+                                <i class="fas fa-link me-2"></i>Copy Link
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="endSession()">
+                                <i class="fas fa-stop me-2"></i>End Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tips -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-primary">
+                        <i class="fas fa-lightbulb me-2"></i>Pair Programming Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Communicate your thinking
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Switch roles regularly
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Ask questions freely
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Be patient with each other
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Code Editor -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-code me-2"></i>Collaborative Code Editor
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light btn-sm" onclick="runCode()">
+                                <i class="fas fa-play me-1"></i>Run
+                            </button>
+                            <button class="btn btn-outline-light btn-sm" onclick="saveCode()">
+                                <i class="fas fa-save me-1"></i>Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="position-relative">
+                        <textarea id="codeEditor" class="form-control border-0" 
+                                  style="min-height: 500px; font-family: 'Monaco', 'Courier New', monospace; font-size: 14px; resize: vertical;">{{ session.code }}</textarea>
+                        <div id="syncStatus" class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-success">
+                                <i class="fas fa-sync-alt me-1"></i>Synced
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Output/Console -->
+            <div class="card border-0 shadow-lg mt-4">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-terminal me-2"></i>Output Console
+                    </h6>
+                </div>
+                <div class="card-body bg-dark text-light" style="min-height: 150px;">
+                    <pre id="codeOutput" class="mb-0">Click "Run" to execute your code...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let sessionId = {{ session.id }};
+let syncTimer;
+let lastSyncTime = Date.now();
+
+// Auto-sync code every 2 seconds
+function startAutoSync() {
+    syncTimer = setInterval(() => {
+        syncCode();
+    }, 2000);
+}
+
+// Sync code with server
+function syncCode() {
+    const code = document.getElementById('codeEditor').value;
+    
+    fetch('/api/update_pair_code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: sessionId,
+            code: code
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateSyncStatus('synced');
+            lastSyncTime = Date.now();
+        } else {
+            updateSyncStatus('error');
+        }
+    })
+    .catch(error => {
+        console.error('Sync error:', error);
+        updateSyncStatus('error');
+    });
+}
+
+// Get latest code from server
+function getLatestCode() {
+    fetch(`/api/get_pair_code/${sessionId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.code) {
+            const editor = document.getElementById('codeEditor');
+            if (editor.value !== data.code) {
+                editor.value = data.code;
+                updateSyncStatus('updated');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+}
+
+// Update sync status indicator
+function updateSyncStatus(status) {
+    const statusElement = document.getElementById('syncStatus');
+    switch(status) {
+        case 'synced':
+            statusElement.innerHTML = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Synced</span>';
+            break;
+        case 'syncing':
+            statusElement.innerHTML = '<span class="badge bg-warning"><i class="fas fa-sync-alt fa-spin me-1"></i>Syncing</span>';
+            break;
+        case 'updated':
+            statusElement.innerHTML = '<span class="badge bg-info"><i class="fas fa-download me-1"></i>Updated</span>';
+            setTimeout(() => updateSyncStatus('synced'), 2000);
+            break;
+        case 'error':
+            statusElement.innerHTML = '<span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Error</span>';
+            break;
+    }
+}
+
+// Run code (simulation)
+function runCode() {
+    const code = document.getElementById('codeEditor').value;
+    const output = document.getElementById('codeOutput');
+    
+    output.textContent = 'Running code...\n\n';
+    
+    // Simulate code execution
+    setTimeout(() => {
+        if (code.includes('print(') || code.includes('console.log')) {
+            output.textContent = `Code executed successfully!\n\nOutput:\nHello, World!\nProgram completed.`;
+        } else {
+            output.textContent = `Code compiled successfully!\n\nNo output to display.\nProgram completed without errors.`;
+        }
+    }, 1500);
+}
+
+// Save code
+function saveCode() {
+    syncCode();
+    alert('Code saved successfully!');
+}
+
+// Copy session link
+function copySessionLink() {
+    const link = window.location.href;
+    navigator.clipboard.writeText(link).then(() => {
+        alert('Session link copied to clipboard!');
+    });
+}
+
+// End session
+function endSession() {
+    if (confirm('Are you sure you want to end this pair programming session?')) {
+        window.location.href = '/collaboration';
+    }
+}
+
+// Auto-sync on code change
+document.getElementById('codeEditor').addEventListener('input', () => {
+    updateSyncStatus('syncing');
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncCode, 1000); // Debounce sync
+});
+
+// Poll for updates from partner every 3 seconds
+setInterval(getLatestCode, 3000);
+
+// Start auto-sync
+startAutoSync();
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    if (syncTimer) {
+        clearInterval(syncTimer);
+    }
+});
+</script>
+{% endblock %}
